@@ -15,9 +15,9 @@ public class p2teleop extends LinearOpMode {
     DcMotor winch_leftMotor;
     DcMotor slide_verticalMotor;
     Servo arm_clawServo;
-    Servo arm_verticalServo;
-    Servo diff_frontServo;
-    Servo diff_rightServo;
+    Servo armServo;
+    Servo claw;
+    Servo rdServo;
     Servo diff_leftServo;
     Servo hang_rightServo;
     Servo hang_leftServo;
@@ -34,10 +34,10 @@ public class p2teleop extends LinearOpMode {
         winch_leftMotor = hardwareMap.dcMotor.get("winch_leftMotor");
         slide_verticalMotor = hardwareMap.dcMotor.get("slide_verticalMotor");
         arm_clawServo = hardwareMap.servo.get("arm_clawServo");
-        arm_verticalServo = hardwareMap.servo.get("arm_verticalServo");
-        diff_frontServo = hardwareMap.servo.get("diff_frontServo");
-        diff_rightServo = hardwareMap.servo.get("diff_rightServo");
-        diff_leftServo = hardwareMap.servo.get("diff_leftServo");
+        arm_verticalServo = hardwareMap.servo.get("armServo");
+        diff_frontServo = hardwareMap.servo.get("claw");
+        rdServo = hardwareMap.servo.get("rdServo");
+        diff_leftServo = hardwareMap.servo.get("ldServo");
         hang_rightServo = hardwareMap.servo.get("hang_rightServo");
         hang_leftServo = hardwareMap.servo.get("hang_leftServo");
         topRight = hardwareMap.dcMotor.get("topRight");
@@ -84,31 +84,26 @@ public class p2teleop extends LinearOpMode {
                 winch_leftMotor.setPower(0); // Stop winch
             }
 
-            // Slide control (Horizontal)
-            slide_horizontalMotor.setPower(gamepad2.left_stick_x);
-
-            // Slide control (Vertical)
-            slide_verticalMotor.setPower(gamepad2.left_stick_y);
 
             // Arm Claw control
             if (gamepad2.a) {
-                arm_clawServo.setPosition(1); // Open Claw
-            } else if (gamepad2.b) {
-                arm_clawServo.setPosition(0); // Close Claw
+                arm_clawServo.setPosition(0); // Open Claw
+            } else {
+                arm_clawServo.setPosition(1); // Close Claw
             }
 
             // Arm Vertical control
             if (gamepad2.dpad_up) {
                 arm_verticalServo.setPosition(1); // Move Arm Up
             } else if (gamepad2.dpad_down) {
-                arm_verticalServo.setPosition(0); // Move Arm Down
+                arm_verticalServo.setPosition(-1); // Move Arm Down
             }
 
             // Differential Claw Control (Right)
             if (gamepad2.x) {
-                diff_rightServo.setPosition(1); // Right Claw Move
-            } else if (gamepad2.y) {
-                diff_rightServo.setPosition(0); // Right Claw Reset
+                rdServo.setPosition(1); // Right Claw Move
+            } else {
+                rdServo.setPosition(0); // Right Claw Reset
             }
 
             // Differential Claw Control (Left)

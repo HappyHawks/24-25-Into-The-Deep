@@ -11,8 +11,11 @@ buildscript {
     }
     dependencies {
         // Note for FTC Teams: Do not modify this yourself.
-        classpath 'com.android.tools.build:gradle:8.7.0'
+        classpath 'com.android.tools.build:gradle:8.9.0'
     }
+}
+ext {
+    sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
 // This is now required because aapt2 has to be downloaded from the
