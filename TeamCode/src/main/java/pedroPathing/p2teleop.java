@@ -58,8 +58,26 @@ public class p2teleop extends LinearOpMode {
                 armServo.setPosition(1);
             }
 
+            // Inside your loop:
             if (gamepad2.x) {
-                arm_clawServo.setPosition();
+                claw.setPosition(1);
+            } else {
+                claw.setPosition(0);
+            }
+
+            // Servo movement speed (adjust as needed)
+            double servoStep = 0.01;
+
+            // Move servos up when left bumper is held
+            if (gamepad2.left_bumper) {
+                rdServo.setPosition(0);
+                ldServo.setPosition(1);
+            }
+
+            // Move servos down when right bumper is held
+            if (gamepad2.right_bumper) {
+                rdServo.setPosition(1);
+                ldServo.setPosition(0);
             }
 
             // Slide control (hold to move, release to stop)
