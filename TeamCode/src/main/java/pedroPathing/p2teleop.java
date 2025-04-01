@@ -1,6 +1,5 @@
-package pedroPathing;// FTC TeleOp Program - Optimized for Driver Control
+package pedroPathing;
 
-// Import necessary FTC libraries
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,124 +9,109 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class p2teleop extends LinearOpMode {
 
     // Declare hardware variables
-    DcMotor slide_horizontalMotor;
-    DcMotor winch_rightMotor;
-    DcMotor winch_leftMotor;
-    DcMotor slide_verticalMotor;
-    Servo arm_clawServo;
-    Servo armServo;
-    Servo claw;
-    Servo rdServo;
-    Servo diff_leftServo;
-    Servo hang_rightServo;
-    Servo hang_leftServo;
-    DcMotor topRight;
-    DcMotor topLeft;
-    DcMotor bottomRight;
-    DcMotor bottomLeft;
+    DcMotor slide_horizontalMotor, winch_rightMotor, winch_leftMotor, slide_verticalMotor;
+    DcMotor topRight, topLeft, bottomRight, bottomLeft;  // Declare drivetrain motors
+    Servo arm_clawServo, armServo, claw, rdServo, ldServo;
+
+    // Slide speed variable
+    private static final double SLIDE_SPEED = 0.5; // Adjust this to control the speed
 
     @Override
     public void runOpMode() {
-        // Initialize hardware variables
+        // Initialize hardware
         slide_horizontalMotor = hardwareMap.dcMotor.get("slide_horizontalMotor");
         winch_rightMotor = hardwareMap.dcMotor.get("winch_rightMotor");
         winch_leftMotor = hardwareMap.dcMotor.get("winch_leftMotor");
         slide_verticalMotor = hardwareMap.dcMotor.get("slide_verticalMotor");
-        arm_clawServo = hardwareMap.servo.get("arm_clawServo");
-        arm_verticalServo = hardwareMap.servo.get("armServo");
-        diff_frontServo = hardwareMap.servo.get("claw");
-        rdServo = hardwareMap.servo.get("rdServo");
-        diff_leftServo = hardwareMap.servo.get("ldServo");
-        hang_rightServo = hardwareMap.servo.get("hang_rightServo");
-        hang_leftServo = hardwareMap.servo.get("hang_leftServo");
-        topRight = hardwareMap.dcMotor.get("topRight");
+
+        // Initialize drivetrain motors
         topLeft = hardwareMap.dcMotor.get("topLeft");
+        topRight = hardwareMap.dcMotor.get("topRight");
         bottomRight = hardwareMap.dcMotor.get("bottomRight");
         bottomLeft = hardwareMap.dcMotor.get("bottomLeft");
 
-        // Set motors to run with no power initially
-        topRight.setPower(0);
-        topLeft.setPower(0);
-        bottomRight.setPower(0);
-        bottomLeft.setPower(0);
-        slide_horizontalMotor.setPower(0);
-        slide_verticalMotor.setPower(0);
-        winch_rightMotor.setPower(0);
-        winch_leftMotor.setPower(0);
+        arm_clawServo = hardwareMap.servo.get("arm_clawServo");
+        armServo = hardwareMap.servo.get("armServo");
+        claw = hardwareMap.servo.get("claw");
+        rdServo = hardwareMap.servo.get("rdServo");
+        ldServo = hardwareMap.servo.get("ldServo");
 
-        // Wait for the start button to be pressed
+        // Reverse motors if needed
+        topLeft.setDirection(DcMotor.Direction.REVERSE);
+        bottomLeft.setDirection(DcMotor.Direction.REVERSE);
+        slide_verticalMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         waitForStart();
 
-        // Run the loop while the OpMode is active
         while (opModeIsActive()) {
-
-            // Mecanum Drive control
-            double drive = -gamepad1.left_stick_y; // Forward/Backward movement
-            double strafe = gamepad1.left_stick_x; // Left/Right movement
-            double rotate = gamepad1.right_stick_x; // Rotation
-
-            // Mecanum drive calculations (simplified)
-            topRight.setPower(drive - strafe - rotate);
-            topLeft.setPower(drive + strafe + rotate);
-            bottomRight.setPower(drive + strafe - rotate);
-            bottomLeft.setPower(drive - strafe + rotate);
-
-            // Winch control
-            if (gamepad2.right_trigger > 0) {
-                winch_rightMotor.setPower(1); // Winch up
-                winch_leftMotor.setPower(1); // Winch up
-            } else if (gamepad2.left_trigger > 0) {
-                winch_rightMotor.setPower(-1); // Winch down
-                winch_leftMotor.setPower(-1); // Winch down
-            } else {
-                winch_rightMotor.setPower(0); // Stop winch
-                winch_leftMotor.setPower(0); // Stop winch
-            }
-
-
-            // Arm Claw control
+            // Claw controls
             if (gamepad2.a) {
-                arm_clawServo.setPosition(0); // Open Claw
+                arm_clawServo.setPosition(0); // Open claw
             } else {
-                arm_clawServo.setPosition(1); // Close Claw
+                arm_clawServo.setPosition(1); // Close claw
             }
 
-            // Arm Vertical control
-            if (gamepad2.dpad_up) {
-                arm_verticalServo.setPosition(1); // Move Arm Up
-            } else if (gamepad2.dpad_down) {
-                arm_verticalServo.setPosition(-1); // Move Arm Down
+            // Arm servo control
+            if (gamepad2.b) {
+                armServo.setPosition(0);
+            } else {
+                armServo.setPosition(1);
             }
 
-            // Differential Claw Control (Right)
             if (gamepad2.x) {
-                rdServo.setPosition(1); // Right Claw Move
+                arm_clawServo.setPosition();
+            }
+
+            // Slide control (hold to move, release to stop)
+            if (gamepad2.dpad_up) {
+                slide_verticalMotor.setPower(SLIDE_SPEED); // Move up
+            } else if (gamepad2.dpad_down) {
+                slide_verticalMotor.setPower(-SLIDE_SPEED); // Move down
             } else {
-                rdServo.setPosition(0); // Right Claw Reset
+                slide_verticalMotor.setPower(0); // Stop when released
             }
 
-            // Differential Claw Control (Left)
-            if (gamepad2.left_bumper) {
-                diff_leftServo.setPosition(1); // Left Claw Move
-            } else if (gamepad2.right_bumper) {
-                diff_leftServo.setPosition(0); // Left Claw Reset
-            }
-
-            // Hang Servo control (move both simultaneously)
-            if (gamepad2.left_trigger > 0.1) {
-                hang_rightServo.setPosition(1); // Rotate right hang servo
-                hang_leftServo.setPosition(1);  // Rotate left hang servo
-            } else if (gamepad2.right_trigger > 0.1) {
-                hang_rightServo.setPosition(0); // Rotate right hang servo
-                hang_leftServo.setPosition(0);  // Rotate left hang servo
+            // Slide control (hold to move, release to stop)
+            if (gamepad2.dpad_left) {
+                slide_horizontalMotor.setPower(SLIDE_SPEED); // Move up
+            } else if (gamepad2.dpad_right) {
+                slide_horizontalMotor.setPower(-SLIDE_SPEED); // Move down
             } else {
-                hang_rightServo.setPosition(0.5); // Default neutral position
-                hang_leftServo.setPosition(0.5);  // Default neutral position
+                slide_horizontalMotor.setPower(0); // Stop when released
             }
 
-            // Telemetry for debugging (optional)
-            telemetry.addData("Drive Power", drive);
+            // Drivetrain control
+            driveTrainControl();
+
             telemetry.update();
         }
+    }
+
+    // Method to control the drivetrain using mecanum logic
+    private void driveTrainControl() {
+        double drive = gamepad1.left_stick_y; // Forward/backward
+        double strafe = gamepad1.left_stick_x; // Left/right
+        double rotate = gamepad1.right_stick_x; // Rotation
+
+        // Mecanum drive calculation
+        double frontLeftPower = (drive + strafe + rotate);
+        double backLeftPower = (drive - strafe + rotate);
+        double frontRightPower = (drive - strafe - rotate);
+        double backRightPower = (drive + strafe - rotate);
+
+        // Normalize the values to ensure the power values are within the range [-1, 1]
+        double max = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(backLeftPower), Math.max(Math.abs(frontRightPower), Math.abs(backRightPower))));
+        if (max > 1.0) {
+            frontLeftPower /= max;
+            backLeftPower /= max;
+            frontRightPower /= max;
+            backRightPower /= max;
+        }
+
+        // Set motor powers
+        topLeft.setPower(frontLeftPower);
+        bottomLeft.setPower(backLeftPower);
+        topRight.setPower(frontRightPower);
+        bottomRight.setPower(backRightPower);
     }
 }
