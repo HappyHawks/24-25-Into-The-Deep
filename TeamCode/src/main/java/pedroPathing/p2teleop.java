@@ -43,42 +43,58 @@ public class p2teleop extends LinearOpMode {
 
         waitForStart();
 
-        while (opModeIsActive()) {
-            // Claw controls
-            if (gamepad2.a) {
-                arm_clawServo.setPosition(0); // Open claw
-            } else {
-                arm_clawServo.setPosition(1); // Close claw
-            }
+        while (opModeIsActive()){
 
             // Arm servo control
             if (gamepad2.b) {
                 armServo.setPosition(0);
             } else {
-                armServo.setPosition(1);
+                armServo.setPosition(.5);
+            }
+
+            if (gamepad2.a) {
+                arm_clawServo.setPosition(1);
+            }
+
+            if (gamepad2.y) {
+                arm_clawServo.setPosition(1);
+            } else {
+                arm_clawServo.setPosition(0);
             }
 
             // Inside your loop:
             if (gamepad2.x) {
                 claw.setPosition(1);
             } else {
-                claw.setPosition(0);
+                claw.setPosition(.2);
             }
 
-            // Servo movement speed (adjust as needed)
-            double servoStep = 0.01;
+            //rdServo.setPosition(0.5);
+            //ldServo.setPosition(0.5);
+            double servoStep = 0.1;
 
-            // Move servos up when left bumper is held
+            // Get the current positions of the servos
+            double rdServoPosition = rdServo.getPosition();
+            double ldServoPosition = ldServo.getPosition();
+
+            // Move servos when bumpers are held
             if (gamepad2.left_bumper) {
-                rdServo.setPosition(0);
-                ldServo.setPosition(1);
+                // Move rdServo upward and ldServo downward
+                rdServoPosition += servoStep;
+                ldServoPosition -= servoStep;
+            } else if (gamepad2.right_bumper) {
+                // Move rdServo downward and ldServo upward
+                rdServoPosition -= servoStep;
+                ldServoPosition += servoStep;
             }
 
-            // Move servos down when right bumper is held
-            if (gamepad2.right_bumper) {
-                rdServo.setPosition(1);
-                ldServo.setPosition(0);
-            }
+            // Clamp positions to valid range (0 to 1)
+            rdServoPosition = Math.max(0, Math.min(1, rdServoPosition));
+            ldServoPosition = Math.max(0, Math.min(1, ldServoPosition));
+
+            // Apply the new positions
+            rdServo.setPosition(rdServoPosition);
+            ldServo.setPosition(ldServoPosition);
 
             // Slide control (hold to move, release to stop)
             if (gamepad2.dpad_up) {
