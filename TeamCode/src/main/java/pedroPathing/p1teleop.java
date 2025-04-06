@@ -5,12 +5,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Two Player Teleop")
-public class p2teleop extends LinearOpMode {
+@TeleOp(name = "One Player Teleop")
+public class p1teleop extends LinearOpMode {
 
     // Declare hardware variables
     DcMotor slide_horizontalMotor, winch_rightMotor, winch_leftMotor, slide_verticalMotor;
-    DcMotor topRight, topLeft, bottomRight, bottomLeft;  // Declare drivetrain motors
+    DcMotor topRight, topLeft, bottomRight, bottomLeft;  // Drivetrain motors
     Servo arm_clawServo, armServo, claw, rdServo, ldServo;
 
     // Slide speed variable
@@ -50,114 +50,77 @@ public class p2teleop extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()){
-
-
-            if (gamepad1.right_bumper) {
-                winch_leftMotor.setPower(1);
-                winch_rightMotor.setPower(-1);
-            } else if (gamepad1.left_bumper) {
-                winch_rightMotor.setPower(1);
-                winch_leftMotor.setPower(-1);
-            } else {
-                winch_leftMotor.setPower(0);
-                winch_rightMotor.setPower(0);
+            // Arm servo control using gamepad1 buttons
+            if (gamepad1.b) {
+                armServo.setPosition(0.15);
             }
-
-            // Arm servo control
-            if (gamepad2.b) {
-                armServo.setPosition(.1);
+            if (gamepad1.right_trigger == 1) {
+                armServo.setPosition(0.5);
             }
-
-            if (gamepad2.right_trigger == 1) {
-                armServo.setPosition(.5);
-            }
-
-            if (gamepad2.left_trigger == 1) {
+            if (gamepad1.left_trigger == 1) {
                 armServo.setPosition(0);
             }
-
-            if (gamepad2.a) {
+            if (gamepad1.a) {
                 armServo.setPosition(1);
             }
 
-            //if (gamepad2.y) {
-                //telemetry.addData("y button detected");
-            // this was commented out  because it was used for a test if the servo programming was wrong or the cable was damaged.
-            // it ended up being the cable.
-
-            // --- Toggle for arm_clawServo using gamepad2.y ---
-            // Rising edge detection for y button
-            if (gamepad2.y && !previousY) {
+            // --- Toggle for arm_clawServo using gamepad1.y ---
+            if (gamepad1.y && !previousY) {
                 yToggle = !yToggle;
             }
-
-            // Set arm_clawServo based on toggle state
             if (yToggle) {
                 arm_clawServo.setPosition(1);
             } else {
                 arm_clawServo.setPosition(0);
             }
 
-            // --- Toggle for claw servo using gamepad2.x ---
-            // Rising edge detection for x button
-            if (gamepad2.x && !previousX) {
+            // --- Toggle for claw servo using gamepad1.x ---
+            if (gamepad1.x && !previousX) {
                 xToggle = !xToggle;
             }
-            // Set claw servo based on toggle state
             if (xToggle) {
                 claw.setPosition(1);
             } else {
                 claw.setPosition(0.2);
             }
-
             // Update previous button states for rising edge detection
-            previousX = gamepad2.x;
-            previousY = gamepad2.y;
+            previousX = gamepad1.x;
+            previousY = gamepad1.y;
 
-
-            //rdServo.setPosition(0.5);
-            //ldServo.setPosition(0.5);
+            // Control for rdServo and ldServo using bumpers
             double servoStep = 0.1;
-
-            // Get the current positions of the servos
             double rdServoPosition = rdServo.getPosition();
             double ldServoPosition = ldServo.getPosition();
 
-            // Move servos when bumpers are held
-            if (gamepad2.left_bumper) {
-                // Move rdServo upward and ldServo downward
+            if (gamepad1.left_bumper) {
                 rdServoPosition += servoStep;
                 ldServoPosition -= servoStep;
-            } else if (gamepad2.right_bumper) {
-                // Move rdServo downward and ldServo upward
+            } else if (gamepad1.right_bumper) {
                 rdServoPosition -= servoStep;
                 ldServoPosition += servoStep;
             }
-
             // Clamp positions to valid range (0 to 1)
             rdServoPosition = Math.max(0, Math.min(1, rdServoPosition));
             ldServoPosition = Math.max(0, Math.min(1, ldServoPosition));
-
-            // Apply the new positions
             rdServo.setPosition(rdServoPosition);
             ldServo.setPosition(ldServoPosition);
 
-            // Slide control (hold to move, release to stop)
-            if (gamepad2.dpad_up) {
+            // Slide control using gamepad1 D-pad for vertical movement
+            if (gamepad1.dpad_up) {
                 slide_verticalMotor.setPower(SLIDE_SPEED); // Move up
-            } else if (gamepad2.dpad_down) {
+            } else if (gamepad1.dpad_down) {
                 slide_verticalMotor.setPower(-SLIDE_SPEED); // Move down
             } else {
-                slide_verticalMotor.setPower(0); // Stop when released
+                slide_verticalMotor.setPower(0);
             }
 
-            // Slide control (hold to move, release to stop)
-            if (gamepad2.dpad_left) {
-                slide_horizontalMotor.setPower(SLIDE_SPEED); // Move up
-            } else if (gamepad2.dpad_right) {
-                slide_horizontalMotor.setPower(-SLIDE_SPEED); // Move down
+            // Slide control using gamepad1 D-pad for horizontal movement
+            if (gamepad1.dpad_left) {
+                slide_horizontalMotor.setPower(SLIDE_SPEED); // Move left
+            } else if (gamepad1.dpad_right) {
+                slide_horizontalMotor.setPower(-SLIDE_SPEED); // Move right
             } else {
-                slide_horizontalMotor.setPower(0); // Stop when released
+                slide_horizontalMotor.setPower(0);
             }
 
             // Drivetrain control
@@ -167,20 +130,21 @@ public class p2teleop extends LinearOpMode {
         }
     }
 
-    // Method to control the drivetrain using mecanum logic
+    // Drivetrain control using mecanum drive logic with speed reduction when the Back button is held
     private void driveTrainControl() {
-        double drive = gamepad1.left_stick_y; // Forward/backward
-        double strafe = gamepad1.left_stick_x; // Left/right
-        double rotate = gamepad1.right_stick_x; // Rotation
+        double speedMultiplier = gamepad1.back ? 0.6 : 1.0;  // 40% speed reduction when Back is held
 
-        // Mecanum drive calculation
+        double drive = gamepad1.left_stick_y * speedMultiplier;    // Forward/backward
+        double strafe = gamepad1.left_stick_x * speedMultiplier;     // Left/right
+        double rotate = gamepad1.right_stick_x * speedMultiplier;    // Rotation
+
         double frontLeftPower = (drive + strafe + rotate);
         double backLeftPower = (drive - strafe + rotate);
         double frontRightPower = (drive - strafe - rotate);
         double backRightPower = (drive + strafe - rotate);
 
-        // Normalize the values to ensure the power values are within the range [-1, 1]
-        double max = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(backLeftPower), Math.max(Math.abs(frontRightPower), Math.abs(backRightPower))));
+        double max = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(backLeftPower),
+                Math.max(Math.abs(frontRightPower), Math.abs(backRightPower))));
         if (max > 1.0) {
             frontLeftPower /= max;
             backLeftPower /= max;
@@ -188,7 +152,6 @@ public class p2teleop extends LinearOpMode {
             backRightPower /= max;
         }
 
-        // Set motor powers
         topLeft.setPower(frontLeftPower);
         bottomLeft.setPower(backLeftPower);
         topRight.setPower(frontRightPower);
