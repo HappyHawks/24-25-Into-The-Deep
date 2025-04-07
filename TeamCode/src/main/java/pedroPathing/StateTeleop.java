@@ -16,11 +16,11 @@ public class StateTeleop extends LinearOpMode {
 
     // Constants
     private static final double SLIDE_SPEED = 0.5;
-    private static final int HORIZONTAL_EXTEND_INTAKE = 200;
-    private static final int HORIZONTAL_EXTEND_DONE = 180;
+    private static final int HORIZONTAL_EXTEND_INTAKE = -500;
+    private static final int HORIZONTAL_EXTEND_DONE = 0;
     private static final double ARM_SERVO_INTAKE = 0.1;  // Adjusted value
     private static final double ARM_SERVO_THROW = 0.9;   // Adjusted value
-    private static final double ARM_CLAW_SERVO_OPEN = 0.0;
+    private static final double ARM_CLAW_SERVO_OPEN = 1;
     private static final double ARM_CLAW_SERVO_CLOSE = 0.2;
 
     // Enums for State Machines
@@ -49,8 +49,8 @@ public class StateTeleop extends LinearOpMode {
         bottomRight = hardwareMap.get(DcMotorEx.class, "rightRear");
         bottomLeft = hardwareMap.get(DcMotorEx.class, "leftRear");
         arm_clawServo = hardwareMap.servo.get("arm_clawServo");
-        armServo = hardwareMap.servo.get("armServo");
-        claw = hardwareMap.servo.get("claw");
+        armServo = hardwareMap.get(Servo.class, "armServo");
+        claw = hardwareMap.get(Servo.class, "claw");
         rdServo = hardwareMap.servo.get("rdServo");
         ldServo = hardwareMap.servo.get("ldServo");
 
