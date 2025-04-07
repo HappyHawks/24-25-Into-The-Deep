@@ -14,7 +14,7 @@ public class p2teleop extends LinearOpMode {
         Servo arm_clawServo, armServo, claw, rdServo, ldServo;
 
     // Slide speed variable
-    private static final double SLIDE_SPEED = 0.5; // Adjust this to control the speed
+    private static final double SLIDE_SPEED = 0.9; // Adjust this to control the speed
 
     @Override
     public void runOpMode() {
@@ -62,22 +62,26 @@ public class p2teleop extends LinearOpMode {
                 winch_rightMotor.setPower(0);
             }
 
-            // Arm servo control
-            // if (gamepad2.b) {
-            //    armServo.setPosition(.1);
-            //}
+            // -------------------- ARM SERVO CONTROL --------------------
+            if (gamepad2.b) {
+                armServo.setPosition(.3);
+            } else if (gamepad2.a) {
+                armServo.setPosition(1);
+            }
 
-            // if (gamepad2.right_trigger == 1) {
-               // armServo.setPosition(.5);
+            telemetry.addData("Arm Servo Position", armServo.getPosition());
+
+            //if (gamepad2.right_trigger == 1) {
+              //  armServo.setPosition(.5);
             //}
 
             //if (gamepad2.left_trigger == 1) {
-              //  armServo.setPosition(0);
+              //armServo.setPosition(0);
             //}
 
-            if (gamepad2.a) {
-                armServo.setPosition(1);
-            }
+            //if (gamepad2.a) {
+                //armServo.setPosition(1);
+            //}
 
             //if (gamepad2.y) {
                 //telemetry.addData("y button detected");
