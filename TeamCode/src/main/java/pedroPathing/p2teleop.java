@@ -9,9 +9,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class p2teleop extends LinearOpMode {
 
     // Declare hardware variables
-    DcMotor slide_horizontalMotor, winch_rightMotor, winch_leftMotor, slide_verticalMotor;
+    DcMotor slide_horizontalMotor, winch_rightMotor, winch_leftMotor, slide_verticalMotor, hang_leftServo, hang_rightServo;
     DcMotor topRight, topLeft, bottomRight, bottomLeft;  // Declare drivetrain motors
-    Servo arm_clawServo, armServo, claw, rdServo, ldServo;
+        Servo arm_clawServo, armServo, claw, rdServo, ldServo;
 
     // Slide speed variable
     private static final double SLIDE_SPEED = 0.5; // Adjust this to control the speed
@@ -25,11 +25,10 @@ public class p2teleop extends LinearOpMode {
         slide_verticalMotor = hardwareMap.dcMotor.get("slide_verticalMotor");
 
         // Initialize drivetrain motors
-        topLeft = hardwareMap.dcMotor.get("topLeft");
-        topRight = hardwareMap.dcMotor.get("topRight");
-        bottomRight = hardwareMap.dcMotor.get("bottomRight");
-        bottomLeft = hardwareMap.dcMotor.get("bottomLeft");
-
+        topLeft = hardwareMap.dcMotor.get("leftFront");
+        topRight = hardwareMap.dcMotor.get("rightFront");
+        bottomRight = hardwareMap.dcMotor.get("rightRear");
+        bottomLeft = hardwareMap.dcMotor.get("leftRear");
         arm_clawServo = hardwareMap.servo.get("arm_clawServo");
         armServo = hardwareMap.servo.get("armServo");
         claw = hardwareMap.servo.get("claw");
@@ -64,17 +63,17 @@ public class p2teleop extends LinearOpMode {
             }
 
             // Arm servo control
-            if (gamepad2.b) {
-                armServo.setPosition(.1);
-            }
+            // if (gamepad2.b) {
+            //    armServo.setPosition(.1);
+            //}
 
-            if (gamepad2.right_trigger == 1) {
-                armServo.setPosition(.5);
-            }
+            // if (gamepad2.right_trigger == 1) {
+               // armServo.setPosition(.5);
+            //}
 
-            if (gamepad2.left_trigger == 1) {
-                armServo.setPosition(0);
-            }
+            //if (gamepad2.left_trigger == 1) {
+              //  armServo.setPosition(0);
+            //}
 
             if (gamepad2.a) {
                 armServo.setPosition(1);
@@ -144,18 +143,18 @@ public class p2teleop extends LinearOpMode {
 
             // Slide control (hold to move, release to stop)
             if (gamepad2.dpad_up) {
-                slide_verticalMotor.setPower(SLIDE_SPEED); // Move up
+                slide_verticalMotor.setPower(-SLIDE_SPEED); // Move up
             } else if (gamepad2.dpad_down) {
-                slide_verticalMotor.setPower(-SLIDE_SPEED); // Move down
+                slide_verticalMotor.setPower(SLIDE_SPEED); // Move down
             } else {
                 slide_verticalMotor.setPower(0); // Stop when released
             }
 
             // Slide control (hold to move, release to stop)
             if (gamepad2.dpad_left) {
-                slide_horizontalMotor.setPower(SLIDE_SPEED); // Move up
+                slide_horizontalMotor.setPower(-SLIDE_SPEED); // Move up
             } else if (gamepad2.dpad_right) {
-                slide_horizontalMotor.setPower(-SLIDE_SPEED); // Move down
+                slide_horizontalMotor.setPower(SLIDE_SPEED); // Move down
             } else {
                 slide_horizontalMotor.setPower(0); // Stop when released
             }
