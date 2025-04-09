@@ -12,10 +12,10 @@ public class p2teleop extends LinearOpMode {
     // Declare hardware variables
     DcMotor slide_horizontalMotor, winch_rightMotor, winch_leftMotor, slide_verticalMotor, hang_leftServo, hang_rightServo;
     DcMotor topRight, topLeft, bottomRight, bottomLeft;  // Declare drivetrain motors
-        Servo arm_clawServo, armServo, claw, rdServo, ldServo;
+    Servo arm_clawServo, armServo, claw, rdServo, ldServo;
 
     // Slide speed variable
-    private static final double SLIDE_SPEED = 0.9; // Adjust this to control the speed
+    private static final double SLIDE_SPEED = 0.5; // Adjust this to control the speed
 
     @Override
     public void runOpMode() {
@@ -39,7 +39,18 @@ public class p2teleop extends LinearOpMode {
         // Reverse motors if needed
         topLeft.setDirection(DcMotor.Direction.REVERSE);
         bottomLeft.setDirection(DcMotor.Direction.REVERSE);
-        slide_verticalMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slide_verticalMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        // Reset and initialize the slide vertical motor encoder
+        slide_verticalMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        slide_verticalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Deadzone so that the slide doesn't ossicilate at the top
+        final int DEAD_ZONE = 50;
+
+        // Define encoder position limits
+        final int MIN_SLIDE_POSITION = 0;      // Fully retracted position
+        final int MAX_SLIDE_POSITION = -2100;   // Fully extended position
 
         // Variables for toggling the servo positions
         boolean xToggle = false;
@@ -63,26 +74,19 @@ public class p2teleop extends LinearOpMode {
                 winch_rightMotor.setPower(0);
             }
 
-            // -------------------- ARM SERVO CONTROL --------------------
+            // -------------------- ARM SERVO CONTROL FOR SAMPLE SCORING --------------------
             if (gamepad2.b) {
-                armServo.setPosition(.3);
+                armServo.setPosition(.2);
             } else if (gamepad2.a) {
                 armServo.setPosition(1);
             }
 
             telemetry.addData("Arm Servo Position", armServo.getPosition());
+            telemetry.addData("VSlide Position", slide_verticalMotor.getCurrentPosition());
 
-            //if (gamepad2.right_trigger == 1) {
-              //  armServo.setPosition(.5);
-            //}
-
-            //if (gamepad2.left_trigger == 1) {
-              //armServo.setPosition(0);
-            //}
-
-            //if (gamepad2.a) {
-                //armServo.setPosition(1);
-            //}
+            if (gamepad2.right_trigger == 1) {
+                armServo.setPosition(.5);
+            }
 
             //if (gamepad2.y) {
                 //telemetry.addData("y button detected");
@@ -146,14 +150,27 @@ public class p2teleop extends LinearOpMode {
             rdServo.setPosition(rdServoPosition);
             ldServo.setPosition(ldServoPosition);
 
-            // Slide control (hold to move, release to stop)
-            if (gamepad2.dpad_up) {
+            // Get the current position of the slide
+            int currentPosition = slide_verticalMotor.getCurrentPosition();
+
+            // If near the top limit, switch to RUN_TO_POSITION to hold position
+            if (currentPosition <= MAX_SLIDE_POSITION - DEAD_ZONE) {
+                slide_verticalMotor.setTargetPosition(MAX_SLIDE_POSITION);
+                slide_verticalMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                slide_verticalMotor.setPower(0.3); // Use a lower power to maintain position
+            }
+
+            // Otherwise, allow normal control using encoder feedback
+            else if (gamepad2.dpad_up && currentPosition > MAX_SLIDE_POSITION - DEAD_ZONE) {
+                slide_verticalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 slide_verticalMotor.setPower(-SLIDE_SPEED); // Move up
-            } else if (gamepad2.dpad_down) {
+            } else if (gamepad2.dpad_down && currentPosition < MIN_SLIDE_POSITION + DEAD_ZONE) {
+                slide_verticalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 slide_verticalMotor.setPower(SLIDE_SPEED); // Move down
             } else {
-                slide_verticalMotor.setPower(0); // Stop when released
+                slide_verticalMotor.setPower(0);
             }
+
 
             // Slide control (hold to move, release to stop)
             if (gamepad2.dpad_left) {
