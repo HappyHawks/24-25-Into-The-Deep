@@ -24,8 +24,8 @@ public class FConstants {
 
         FollowerConstants.mass = 12.61; //super light
 
-        FollowerConstants.xMovement = 62.21109132809397;
-        FollowerConstants.yMovement = 50.9574512541638;
+        FollowerConstants.xMovement = -61.7195;
+        FollowerConstants.yMovement = 49.4942;
 
         FollowerConstants.forwardZeroPowerAcceleration = -34.332655989515345;
         FollowerConstants.lateralZeroPowerAcceleration = -38.42872863170031;
