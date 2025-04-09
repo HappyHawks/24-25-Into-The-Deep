@@ -47,9 +47,6 @@ android {
         }
     }
 
-    aaptOptions {
-        noCompress "tflite"
-    }
 
     defaultConfig {
         signingConfig signingConfigs.debug
@@ -106,13 +103,10 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility 1.8
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    packagingOptions {
-        pickFirst '**/*.so'
-    }
     ndkVersion '21.3.6528147'
 }
 
